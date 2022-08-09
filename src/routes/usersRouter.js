@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { validateSchema } from "../middlewares/schemaValidator.js";
 import userSchema from "../schemas/userSchema.js";
+import { createUser } from "../controllers/userController.js";
+import { validateSchema } from "./../middlewares/schemaValidator.js";
 
-const userRouter = Router ();
+const usersRouter = Router();
 
-userRouter.post('/signup', validateSchema(userSchema));
+usersRouter.post('/signup', validateSchema(userSchema), createUser);
 
-export default userRouter;
+
+export default usersRouter;
