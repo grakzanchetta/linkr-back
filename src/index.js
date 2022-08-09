@@ -1,4 +1,4 @@
-import cors from 'cors';
+import cors from "cors";
 import dotenv from "dotenv";
 import express, { json } from "express";
 dotenv.config();
