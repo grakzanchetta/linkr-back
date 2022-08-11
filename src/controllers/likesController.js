@@ -15,11 +15,11 @@ export async function createLike(req, res) {
 }
 
 export async function dislike(req, res) {
-  const { postId } = req.body;
+  const { id } = req.params;
   const { userId } = res.locals;
 
   try {
-    const { rowCount } = await likesRepository.deleteLike(userId, postId);
+    const { rowCount } = await likesRepository.deleteLike(userId, id);
 
     if (rowCount === 0) return res.sendStatus(404);
 
