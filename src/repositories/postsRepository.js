@@ -9,10 +9,14 @@ function createPost(postUrl, postText, userId) {
 
 function getPosts(userId) {
   return db.query(
-    `SELECT u.id, username, "pictureUrl", "postUrl", "postText", 
-      CASE WHEN "userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor" 
+    `SELECT p.id, username, "pictureUrl", "postUrl", "postText", 
+      CASE WHEN p."userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor",
+      COUNT(l.id)::INTEGER AS likes,
+      CASE WHEN l."userId" = $1 THEN TRUE ELSE FALSE END AS "userLike"
     FROM posts p
-    JOIN users u ON u.id = "userId"
+    LEFT JOIN users u ON u.id = p."userId"
+    LEFT JOIN likes l ON p.id = l."postId"
+    GROUP BY p.id, u.id, l."userId"
     ORDER BY p."createdAt" DESC
     LIMIT 20`,
     [userId]
