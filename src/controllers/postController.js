@@ -1,4 +1,5 @@
 import postsRepository from "../repositories/postsRepository.js";
+import usersRepository from "../repositories/usersRepository.js";
 
 export async function createPost(req, res) {
   let { postUrl, postText } = req.body;
@@ -22,7 +23,11 @@ export async function getPosts(_, res) {
   try {
     const { rows: posts } = await postsRepository.getPosts(userId);
 
-    return res.status(200).send(posts);
+    let { rows: user } = await usersRepository.getUserById(userId);
+
+    user[0] = { ...user[0], posts };
+
+    return res.status(200).send(user[0]);
   } catch (error) {
     console.log(error);
     return res.status(500).send(error);
