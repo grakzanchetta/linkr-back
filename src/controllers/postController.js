@@ -48,3 +48,20 @@ export async function deletePost(req, res) {
     return res.status(500).send(error);
   }
 }
+
+export async function editPost(req, res) {
+  const { postId, postText } = req.body;
+
+  if (postText.trim() === "") postText = null;
+
+  try {
+    const { rowCount } = postsRepository.updatePost(postText, postId);
+
+    if (rowCount === 0) return res.sendStatus(404);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
+}
