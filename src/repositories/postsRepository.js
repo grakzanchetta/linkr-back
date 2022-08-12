@@ -32,6 +32,13 @@ function deletePost(id) {
   return db.query(`DELETE FROM posts WHERE id = $1`, [id]);
 }
 
+function updatePost(postText, postId) {
+  return db.query(`UPDATE posts SET "postText" = $1 WHERE id = $2`, [
+    postText,
+    postId
+  ]);
+}
+
 function getPost(postUrl,postText,userId) {
   return db.query(
     `SELECT id FROM posts WHERE "postUrl" = $1 AND "postText" = $2 AND "userId" = $3` ,
@@ -39,5 +46,5 @@ function getPost(postUrl,postText,userId) {
   );
 }
 
-export default { createPost, getPosts, getPost, deletePost };
+export default { createPost, getPosts, getPost, deletePost, updatePost };
 
