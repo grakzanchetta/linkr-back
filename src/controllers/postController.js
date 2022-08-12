@@ -1,5 +1,8 @@
+import { hash } from "bcrypt";
 import postsRepository from "../repositories/postsRepository.js";
 import usersRepository from "../repositories/usersRepository.js";
+import hashList from "../schemas/hashSchema.js";
+import { InputHashtags } from "./hashtagController.js";
 
 export async function createPost(req, res) {
   let { postUrl, postText } = req.body;
@@ -9,7 +12,9 @@ export async function createPost(req, res) {
 
   try {
     await postsRepository.createPost(postUrl, postText, userId);
-
+    console.log("vai para inputhashtag")
+    InputHashtags(postUrl, postText, userId, hashList)
+    console.log("passou pelo inputhashtag")
     return res.sendStatus(201);
   } catch (error) {
     console.log(error);
