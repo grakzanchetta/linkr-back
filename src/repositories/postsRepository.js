@@ -28,4 +28,7 @@ function getPosts(userId) {
   );
 }
 
-export default { createPost, getPosts };
+function deletePost(id) {
+  return db.query(`DELETE FROM posts WHERE id = $1`, [id]);
+}
+export default { createPost, getPosts, deletePost };

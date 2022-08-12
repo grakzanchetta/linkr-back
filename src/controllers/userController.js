@@ -12,8 +12,6 @@ export async function createUser(req, res) {
     }
     const { username, email, password, pictureUrl } = user;
 
-    console.log(password);
-
     await usersRepository.createUser(username, email, password, pictureUrl);
     res.sendStatus(201);
   } catch (error) {
