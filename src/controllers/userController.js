@@ -10,8 +10,9 @@ export async function createUser(req, res) {
     if (existingUsers.rowCount > 0) {
       return res.status(409).send(error.message);
     }
-    const { username, email, password, pictureUrl } = user;
 
+    const { username, email, password, pictureUrl } = user;
+    
     await usersRepository.createUser(username, email, password, pictureUrl);
     res.sendStatus(201);
   } catch (error) {

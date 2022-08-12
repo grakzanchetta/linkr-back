@@ -39,4 +39,12 @@ function updatePost(postText, postId) {
   ]);
 }
 
-export default { createPost, getPosts, deletePost, updatePost };
+function getPost(postUrl,postText,userId) {
+  return db.query(
+    `SELECT id FROM posts WHERE "postUrl" = $1 AND "postText" = $2 AND "userId" = $3` ,
+    [postUrl,postText,userId]
+  );
+}
+
+export default { createPost, getPosts, getPost, deletePost, updatePost };
+
