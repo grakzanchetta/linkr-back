@@ -15,3 +15,23 @@ if(process.env.MODE === "PROD") {
 
 const db = new Pool(configDatabase);
 export default db;
+
+
+// import pkg from 'pg';
+// import dotenv from 'dotenv';
+
+// const { Pool } = pkg;
+
+// dotenv.config();
+
+// const db = new Pool({
+
+// host : "localhost",
+// port : 5432 ,
+// user :"postgres",
+// password : "admin",
+// database : "linker"
+// });
+
+
+// export default db;

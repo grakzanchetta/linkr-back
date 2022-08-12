@@ -7,6 +7,8 @@ import {
   getPosts,
   deletePost
 } from "../controllers/postController.js";
+import findingHash from "../middlewares/findingHashs.js"
+import hashList from "../schemas/hashSchema.js";
 
 const postsRouter = Router();
 
@@ -18,6 +20,7 @@ postsRouter.post(
   "/posts",
   validateSchema(postSchema),
   tokenValidator,
+  findingHash,
   createPost
 );
 
