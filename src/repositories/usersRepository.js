@@ -18,9 +18,11 @@ async function createUser(username, email, plainPassword, pictureUrl) {
   return db.query(
     `
       INSERT INTO users (email, password, username, "pictureUrl") 
-      VALUES ($1, $2, $3, $4)`,
-    [email, passwordHash, username, pictureUrl]
-  );
+
+      VALUES ($1, $2, $3, $4)`, 
+      [email, passwordHash, username, pictureUrl]);
+
+
 }
 
 async function createSession(token, userId) {
