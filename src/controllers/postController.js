@@ -38,3 +38,18 @@ export async function getPosts(_, res) {
     return res.status(500).send(error);
   }
 }
+
+export async function deletePost(req, res) {
+  const { id } = req.params;
+
+  try {
+    const { rowCount } = await postsRepository.deletePost(id);
+
+    if (rowCount === 0) return res.sendStatus(404);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
+}
