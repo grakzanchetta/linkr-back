@@ -1,4 +1,5 @@
 import { hash } from "bcrypt";
+import urlMetadata from "url-metadata";
 import postsRepository from "../repositories/postsRepository.js";
 import usersRepository from "../repositories/usersRepository.js";
 import hashList from "../schemas/hashSchema.js";
@@ -11,7 +12,16 @@ export async function createPost(req, res) {
   if (postText.trim() === "") postText = null;
 
   try {
-    await postsRepository.createPost(postUrl, postText, userId);
+    const { title, image, description } = await urlMetadata(postUrl);
+
+    await postsRepository.createPost(
+      postUrl,
+      postText,
+      title,
+      image,
+      description,
+      userId
+    );
     console.log("vai para inputhashtag");
     InputHashtags(postUrl, postText, userId, hashList);
     console.log("passou pelo inputhashtag");

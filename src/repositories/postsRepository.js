@@ -1,9 +1,11 @@
 import db from "../databases/database.js";
 
-function createPost(postUrl, postText, userId) {
+function createPost(postUrl, postText, title, image, description, userId) {
   return db.query(
-    `INSERT INTO posts ("postUrl", "postText", "userId") VALUES ($1, $2, $3)`,
-    [postUrl, postText, userId]
+    `INSERT INTO 
+      posts ("postUrl", "postText", title, image, description, "userId") 
+      VALUES ($1, $2, $3, $4, $5, $6)`,
+    [postUrl, postText, title, image, description, userId]
   );
 }
 
@@ -18,7 +20,8 @@ function getPosts(userId, getByUser = null) {
 
   return db.query(
     `SELECT 
-      p.id, p."userId", u.username, u."pictureUrl" ,p."postUrl", p."postText", 
+      p.id, p."userId", u.username, u."pictureUrl" ,p."postUrl", 
+      p.title, p.image, p.description, p."postText", 
       COALESCE(tl.likes, '[]') AS likes,
       CASE WHEN p."userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor"
     FROM posts p
