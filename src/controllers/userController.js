@@ -12,7 +12,7 @@ export async function createUser(req, res) {
     }
 
     const { username, email, password, pictureUrl } = user;
-    
+
     await usersRepository.createUser(username, email, password, pictureUrl);
     res.sendStatus(201);
   } catch (error) {
@@ -36,4 +36,15 @@ export async function loginUser(req, res) {
   }
 
   res.sendStatus(401);
+}
+
+export async function getAllUsers(_, res) {
+  try {
+    const { rows: users } = await usersRepository.getAllUsers();
+
+    return res.status(200).send(users);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
 }

@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt";
 import db from "../databases/database.js";
 
+async function getAllUsers() {
+  return db.query(`SELECT id, username, "pictureUrl" FROM users`);
+}
+
 async function getUserByEmail(email) {
   return db.query(`SELECT * FROM users WHERE email = $1 `, [email]);
 }
@@ -19,10 +23,9 @@ async function createUser(username, email, plainPassword, pictureUrl) {
     `
       INSERT INTO users (email, password, username, "pictureUrl") 
 
-      VALUES ($1, $2, $3, $4)`, 
-      [email, passwordHash, username, pictureUrl]);
-
-
+      VALUES ($1, $2, $3, $4)`,
+    [email, passwordHash, username, pictureUrl]
+  );
 }
 
 async function createSession(token, userId) {
@@ -37,7 +40,8 @@ const usersRepository = {
   createUser,
   createSession,
   getUserByEmail,
-  getUserById
+  getUserById,
+  getAllUsers
 };
 
 export default usersRepository;
