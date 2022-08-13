@@ -12,9 +12,9 @@ export async function createPost(req, res) {
 
   try {
     await postsRepository.createPost(postUrl, postText, userId);
-    console.log("vai para inputhashtag")
-    InputHashtags(postUrl, postText, userId, hashList)
-    console.log("passou pelo inputhashtag")
+    console.log("vai para inputhashtag");
+    InputHashtags(postUrl, postText, userId, hashList);
+    console.log("passou pelo inputhashtag");
     return res.sendStatus(201);
   } catch (error) {
     console.log(error);
@@ -65,6 +65,20 @@ export async function editPost(req, res) {
     if (rowCount === 0) return res.sendStatus(404);
 
     return res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
+}
+
+export async function getPostsByUser(req, res) {
+  const { userId } = res.locals;
+  const { id } = req.params;
+
+  try {
+    const { rows: posts } = await postsRepository.getPosts(userId, id);
+
+    return res.status(200).send(posts);
   } catch (error) {
     console.log(error);
     return res.status(500).send(error);

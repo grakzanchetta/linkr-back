@@ -7,7 +7,15 @@ function createPost(postUrl, postText, userId) {
   );
 }
 
-function getPosts(userId) {
+function getPosts(userId, getByUser = null) {
+  const where = getByUser !== null ? 'WHERE p."userId" = $2' : "";
+
+  const limit = getByUser === null ? "LIMIT 20" : "";
+
+  const params = [userId];
+
+  if (getByUser !== null) params.push(getByUser);
+
   return db.query(
     `SELECT 
       p.id, p."userId", u.username, u."pictureUrl" ,p."postUrl", p."postText", 
@@ -20,11 +28,11 @@ function getPosts(userId) {
         "postId", JSON_AGG(JSON_BUILD_OBJECT('id', "userId", 'username', username)) AS likes
       FROM likes l 
       JOIN users u ON u.id = "userId" 
-      GROUP BY "postId") tl 
-    ON tl."postId" = p.id
+      GROUP BY "postId") tl ON tl."postId" = p.id
+    ${where}
     ORDER BY p.id DESC
-	  LIMIT 20`,
-    [userId]
+	  ${limit}`,
+    params
   );
 }
 
@@ -39,12 +47,11 @@ function updatePost(postText, postId) {
   ]);
 }
 
-function getPost(postUrl,postText,userId) {
+function getPost(postUrl, postText, userId) {
   return db.query(
-    `SELECT id FROM posts WHERE "postUrl" = $1 AND "postText" = $2 AND "userId" = $3` ,
-    [postUrl,postText,userId]
+    `SELECT id FROM posts WHERE "postUrl" = $1 AND "postText" = $2 AND "userId" = $3`,
+    [postUrl, postText, userId]
   );
 }
 
 export default { createPost, getPosts, getPost, deletePost, updatePost };
-
