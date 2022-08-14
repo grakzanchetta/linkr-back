@@ -9,7 +9,7 @@ export async function createPost(req, res) {
   let { postUrl, postText } = req.body;
   const { userId } = res.locals;
 
-  if (postText.trim() === "") postText = null;
+  if (postText.trim() === "" || postText === null) postText = "";
 
   try {
     let { title, image, description } = await urlMetadata(postUrl);
