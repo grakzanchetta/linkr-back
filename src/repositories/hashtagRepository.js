@@ -1,7 +1,16 @@
 import db from "../databases/database.js";
 
 async function GetHashtag(hashtag) {
-    return db.query('SELECT sub.post AS post, sub."user" as user FROM (SELECT p."postText" AS post, u."username" AS user ,p.id AS id FROM posts p JOIN users u ON u.id=p."userId")sub JOIN hashtags h ON h."postId"=sub.id WHERE h.name ILIKE $1', [`%${hashtag}%`]);
+    
+    return db.query(`SELECT sub.id, sub."userId", u.username, u."pictureUrl" ,sub."postUrl", sub.title, sub.image, sub.description, sub."postText", 
+    COALESCE(tl.likes, '[]') AS likes
+    FROM  ( SELECT  p.*, h.name FROM posts p JOIN  hashtags h ON h."postId" = p.id)sub 
+    JOIN users u ON u.id = sub."userId" FULL JOIN 
+    (SELECT "postId", JSON_AGG(JSON_BUILD_OBJECT('id', "userId", 'username', username)) AS likes
+    FROM likes l 
+    JOIN users u ON u.id = "userId" 
+    GROUP BY "postId") tl ON tl."postId" = sub.id
+    WHERE sub.name ILIKE $1`,[`#${hashtag}`])
 }
 
 async function InputHashtag( postId, hash) {
