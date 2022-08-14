@@ -12,7 +12,11 @@ export async function createPost(req, res) {
   if (postText.trim() === "") postText = null;
 
   try {
-    const { title, image, description } = await urlMetadata(postUrl);
+    let { title, image, description } = await urlMetadata(postUrl);
+
+    if (title === null) title = "";
+    if (image === null) image = "";
+    if (description === null) description = "";
 
     await postsRepository.createPost(
       postUrl,
