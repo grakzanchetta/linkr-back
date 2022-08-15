@@ -48,3 +48,16 @@ export async function getAllUsers(_, res) {
     return res.status(500).send(error);
   }
 }
+
+export async function getUser(_, res) {
+  const { userId } = res.locals;
+
+  try {
+    const { rows: user } = await usersRepository.getUserById(userId);
+
+    return res.status(200).send(user[0]);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
+}
