@@ -39,8 +39,10 @@ export async function loginUser(req, res) {
 }
 
 export async function getAllUsers(_, res) {
+  const { userId } = res.locals;
+
   try {
-    const { rows: users } = await usersRepository.getAllUsers();
+    const { rows: users } = await usersRepository.getAllUsers(userId);
 
     return res.status(200).send(users);
   } catch (error) {

@@ -16,6 +16,6 @@ usersRouter.post("/signup", validateSchema(userSchema), createUser);
 usersRouter.post("/", validateSchema(loginSchema), loginUser);
 
 usersRouter.get("/users/me", tokenValidator, getUser);
-usersRouter.get("/users", getAllUsers);
+usersRouter.get("/users", tokenValidator, getAllUsers);
 
 export default usersRouter;

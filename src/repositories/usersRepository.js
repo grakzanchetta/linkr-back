@@ -1,8 +1,16 @@
 import bcrypt from "bcrypt";
 import db from "../databases/database.js";
 
-async function getAllUsers() {
-  return db.query(`SELECT id, username, "pictureUrl" FROM users`);
+async function getAllUsers(userId) {
+  return db.query(
+    `
+    SELECT u.id, u.username, u."pictureUrl",
+	    CASE WHEN r."followerId" = $1 THEN TRUE ELSE FALSE END AS follow
+    FROM users u
+    FULL JOIN relationships r ON r."userId" = u.id
+`,
+    [userId]
+  );
 }
 
 async function getUserByEmail(email) {
