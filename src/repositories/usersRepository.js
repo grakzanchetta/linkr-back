@@ -3,11 +3,15 @@ import db from "../databases/database.js";
 
 async function getAllUsers(userId) {
   return db.query(
-    `
-    SELECT u.id, u.username, u."pictureUrl",
-	    CASE WHEN r."followerId" = $1 THEN TRUE ELSE FALSE END AS follow
-    FROM users u
-    FULL JOIN relationships r ON r."userId" = u.id
+    `SELECT u.id, u.username, u."pictureUrl",
+      CASE WHEN 
+        (JSON_AGG(r."followerId") FILTER (WHERE r."followerId" = $1)) IS NOT NULL 
+          THEN TRUE 
+          ELSE FALSE 
+          END AS follow
+      FROM users u
+      FULL JOIN relationships r ON r."userId" = u.id
+    GROUP BY r."userId", u.id
 `,
     [userId]
   );

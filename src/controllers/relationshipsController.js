@@ -27,3 +27,16 @@ export async function unfollow(req, res) {
     return res.status(500).send(error);
   }
 }
+
+export async function getPostsByFollow(_, res) {
+  const { userId } = res.locals;
+
+  try {
+    const { rows: posts } = await relationshipsRepository.getPostsByFollow(userId);
+
+    return res.status(200).send(posts);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
+}
