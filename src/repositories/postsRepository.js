@@ -18,11 +18,25 @@ function getPosts(userId, getByUser = null) {
 
   if (getByUser !== null) params.push(getByUser);
 
+  const POST_COMMENTS = `
+    (SELECT c."postId", 
+    JSON_AGG(JSON_BUILD_OBJECT(
+      'id', c.id, 'username', u.username, 
+      'pictureUrl', u."pictureUrl", 'comment', c.comment, 
+      'isAuthor', CASE WHEN c."userId" = p."userId" THEN TRUE ELSE FALSE END,
+      'follow', CASE WHEN r."followerId" = $1 THEN TRUE ELSE FALSE END)) AS comments
+    FROM comments c
+    JOIN posts p ON p.id = c."postId"
+    JOIN users u ON c."userId" = u.id
+    FULL JOIN relationships r ON r."userId" = c."userId"
+    GROUP BY c."postId")`;
+
   return db.query(
     `SELECT 
       p.id, p."userId", u.username, u."pictureUrl" ,p."postUrl", 
       p.title, p.image, p.description, p."postText", 
       COALESCE(tl.likes, '[]') AS likes,
+      COALESCE(tc.comments, '[]') AS comments,
       CASE WHEN p."userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor"
     FROM posts p
     JOIN users u ON u.id = p."userId"
@@ -32,6 +46,7 @@ function getPosts(userId, getByUser = null) {
       FROM likes l 
       JOIN users u ON u.id = "userId" 
       GROUP BY "postId") tl ON tl."postId" = p.id
+    FULL JOIN ${POST_COMMENTS} tc ON tc."postId" = p.id
     ${where}
     ORDER BY p.id DESC
 	  ${limit}`,
