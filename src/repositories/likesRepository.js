@@ -16,15 +16,14 @@ function deleteLike(userId, postId) {
 
 function getAll() {
   return db.query(`
-    SELECT p.id, 
-	    CASE WHEN l."userId" IS NULL 
-		    THEN '[]' 
-		    ELSE  JSON_AGG(JSON_BUILD_OBJECT('id', l."userId", 'username', u.username)) 
-		    END AS likes
-    FROM likes l
-    JOIN users u ON u.id = l."userId"
-    FULL JOIN posts p ON p.id = l."postId"
-    GROUP BY p.id, l."postId", l."userId"`);
+  SELECT p.id, 
+  COALESCE(JSON_AGG(JSON_BUILD_OBJECT('id', l."userId", 'username', u.username))
+  FILTER (WHERE l."userId" IS NOT NULL), '[]') 
+     AS likes
+FROM likes l
+JOIN users u ON u.id = l."userId"
+FULL JOIN posts p ON p.id = l."postId"
+GROUP BY p.id`);
 }
 
 export default { insertLike, deleteLike, getAll };

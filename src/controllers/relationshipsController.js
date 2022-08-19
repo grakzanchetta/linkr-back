@@ -51,6 +51,8 @@ export async function getPostsByFollow(_, res) {
 
     const { rows: likes } = await likesRepository.getAll();
 
+    console.log(likes);
+
     let teste = postsAt.map(post => {
       for (let i = 0; i < comments.length; i++) {
         if (comments[i].id === post.id)
