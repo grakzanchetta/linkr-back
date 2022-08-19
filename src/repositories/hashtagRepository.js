@@ -14,11 +14,18 @@ async function GetHashtag(hashtag, userId) {
     FULL JOIN relationships r ON r."userId" = c."userId"
     GROUP BY c."postId")`;
 
+  const REPOST_LENGTH = `(
+      SELECT p.id, COUNT(p.id) AS count
+      FROM "rePosts" rp 
+      JOIN posts p ON p.id = rp."postId" 
+      GROUP BY p.id)`;
+
   return db.query(
     `SELECT 
       sub.id, sub."userId", u.username, u."pictureUrl" ,sub."postUrl", sub.title, sub.image, sub.description, sub."postText", 
     COALESCE(tl.likes, '[]') AS likes, 
-    COALESCE(tc.comments, '[]') AS comments
+    COALESCE(tc.comments, '[]') AS comments,
+    COALESCE(trp.count, 0) AS "rePostCount"
     FROM ( SELECT  p.*, h.name 
       FROM posts p 
       JOIN  hashtags h ON h."postId" = p.id) sub 
@@ -29,6 +36,7 @@ async function GetHashtag(hashtag, userId) {
         JOIN users u ON u.id = "userId" 
         GROUP BY "postId") tl ON tl."postId" = sub.id
     FULL JOIN ${POST_COMMENTS} tc ON tc."postId" = sub.id
+    FULL JOIN ${REPOST_LENGTH} trp ON trp.id = sub.id
     WHERE sub.name ILIKE $1`,
     [`#${hashtag}`, userId]
   );

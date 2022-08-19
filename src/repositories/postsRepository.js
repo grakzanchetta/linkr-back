@@ -9,48 +9,80 @@ function createPost(postUrl, postText, title, image, description, userId) {
   );
 }
 
-function getPosts(userId, getByUser = null) {
-  const where = getByUser !== null ? 'WHERE p."userId" = $2' : "";
+function getPosts(userId, id) {
+  // const where = getByUser !== null ? 'WHERE p."userId" = $2' : "";
 
-  const limit = getByUser === null ? "LIMIT 20" : "";
+  //const limit = getByUser === null ? "LIMIT 20" : "";
 
-  const params = [userId];
+  //const params = [userId];
 
-  if (getByUser !== null) params.push(getByUser);
+  //if (getByUser !== null) params.push(getByUser);
 
-  const POST_COMMENTS = `
-    (SELECT c."postId", 
-    JSON_AGG(JSON_BUILD_OBJECT(
-      'id', c.id, 'username', u.username, 
-      'pictureUrl', u."pictureUrl", 'comment', c.comment, 
-      'isAuthor', CASE WHEN c."userId" = p."userId" THEN TRUE ELSE FALSE END,
-      'follow', CASE WHEN r."followerId" = $1 THEN TRUE ELSE FALSE END)) AS comments
-    FROM comments c
-    JOIN posts p ON p.id = c."postId"
-    JOIN users u ON c."userId" = u.id
-    FULL JOIN relationships r ON r."userId" = c."userId"
-    GROUP BY c."postId")`;
+  const REPOST_LENGTH = `(
+    SELECT p.id, COUNT(p.id) AS count
+    FROM "rePosts" rp 
+    JOIN posts p ON p.id = rp."postId" 
+    GROUP BY p.id)`;
 
   return db.query(
     `SELECT 
-      p.id, p."userId", u.username, u."pictureUrl" ,p."postUrl", 
-      p.title, p.image, p.description, p."postText", 
-      COALESCE(tl.likes, '[]') AS likes,
-      COALESCE(tc.comments, '[]') AS comments,
-      CASE WHEN p."userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor"
+    p.id, "postUrl", "postText", p."userId", username, "pictureUrl",  
+    title, image, description, 
+    CASE WHEN p."userId" = $2 THEN TRUE ELSE FALSE END AS "isAuthor",
+    NULL AS "rePost", COALESCE(trp.count, 0) AS "rePostCount" ,p."createdAt" 
+  FROM posts p
+  JOIN users u ON u.id = p."userId"
+  FULL JOIN ${REPOST_LENGTH} trp ON trp.id = p.id
+  WHERE p."userId" = $1
+  UNION ALL
+  SELECT 
+    rp.id, "postUrl", "postText", p."userId", username, "pictureUrl", title, image, 
+    description, 
+    CASE WHEN p."userId" = $2 THEN TRUE ELSE FALSE END AS "isAuthor",
+    rc.username AS "rePost", trp.count AS "rePostCount" ,rp."createdAt" 
+  FROM "rePosts" rp
+  JOIN posts p ON rp."postId" = p.id
+  JOIN users rc ON rp."userId" = rc.id
+  JOIN ${REPOST_LENGTH} trp ON trp.id = rp.id
+  WHERE rp."userId" = $1
+  ORDER BY "createdAt" DESC`,
+    [`${id}`, `${userId}`]
+  );
+}
+
+function getPostsByFollow(userId) {
+  const REPOST_LENGTH = `(
+    SELECT p.id, COUNT(p.id) AS count
+    FROM "rePosts" rp 
+    JOIN posts p ON p.id = rp."postId" 
+    GROUP BY p.id)`;
+
+  return db.query(
+    `SELECT 
+      p.id, "postUrl", "postText", p."userId", username, "pictureUrl",  
+      title, image,description, 
+      CASE WHEN p."userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor",
+      NULL AS "rePost", COALESCE(trp.count, 0) AS "rePostCount" ,p."createdAt" 
     FROM posts p
     JOIN users u ON u.id = p."userId"
-    FULL JOIN 
-      (SELECT
-        "postId", JSON_AGG(JSON_BUILD_OBJECT('id', "userId", 'username', username)) AS likes
-      FROM likes l 
-      JOIN users u ON u.id = "userId" 
-      GROUP BY "postId") tl ON tl."postId" = p.id
-    FULL JOIN ${POST_COMMENTS} tc ON tc."postId" = p.id
-    ${where}
-    ORDER BY p.id DESC
-	  ${limit}`,
-    params
+    RIGHT JOIN relationships r ON r."userId" = p."userId"
+    FULL JOIN ${REPOST_LENGTH} trp ON trp.id = p.id
+    WHERE r."followerId" = $1
+    UNION ALL
+    SELECT 
+      rp.id, "postUrl", "postText", p."userId", u.username, u."pictureUrl", title, image, 
+      description, 
+      CASE WHEN p."userId" = $1 THEN TRUE ELSE FALSE END AS "isAuthor",
+      rc.username AS "rePost", trp.count AS "rePostCount" ,rp."createdAt" 
+    FROM "rePosts" rp
+    JOIN posts p ON rp."postId" = p.id
+    JOIN users u ON p."userId" = u.id
+    JOIN users rc ON rp."userId" = rc.id
+    JOIN relationships r ON r."userId" = rp."userId"
+    JOIN ${REPOST_LENGTH} trp ON trp.id = rp.id
+    WHERE r."followerId" = $1
+    ORDER BY "createdAt" DESC`,
+    [userId]
   );
 }
 
@@ -72,4 +104,11 @@ function getPost(postUrl, postText, userId) {
   );
 }
 
-export default { createPost, getPosts, getPost, deletePost, updatePost };
+export default {
+  createPost,
+  getPosts,
+  getPost,
+  deletePost,
+  updatePost,
+  getPostsByFollow
+};

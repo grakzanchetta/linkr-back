@@ -7,6 +7,7 @@ import postsRouter from "./postsRouter.js";
 import likesRouter from "./likesRouter.js";
 import relationshipsRouter from "./relationshipsRouter.js";
 import commentsRouter from "./commentRouter.js";
+import rePostRouter from "./rePostRouter.js";
 
 const router = Router();
 
@@ -21,5 +22,7 @@ router.use(likesRouter);
 router.use(relationshipsRouter);
 
 router.use(commentsRouter);
+
+router.use(rePostRouter);
 
 export default router;
