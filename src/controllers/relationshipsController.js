@@ -35,10 +35,6 @@ export async function getPostsByFollow(_, res) {
   const { userId } = res.locals;
 
   try {
-    // const { rows: posts } = await relationshipsRepository.getPostsByFollow(
-    //   userId
-    // );
-
     const { rows: postsAt } = await postsRepository.getPostsByFollow(userId);
 
     if (postsAt.length === 0)
@@ -46,14 +42,12 @@ export async function getPostsByFollow(_, res) {
         .status(200)
         .send("You don't follow anyone yet. Search for new friends!");
 
-    if (postsAt[0].id === null)
+    if (postsAt.length === 1 && postsAt[0].id === null)
       return res.status(200).send("No posts found from your friends");
 
     const { rows: comments } = await commentsRepository.getAll(userId);
 
     const { rows: likes } = await likesRepository.getAll();
-
-    // if (postsAt.fields[0].tableID === 0) console.log("oi");
 
     let teste = postsAt.map(post => {
       for (let i = 0; i < comments.length; i++) {

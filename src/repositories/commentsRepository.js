@@ -15,8 +15,9 @@ function getAll(userId) {
           JSON_BUILD_OBJECT('id', c.id, 'username', u.username, 
             'pictureUrl', u."pictureUrl", 'comment', c.comment,
 		        'isAuthor', CASE WHEN c."userId" = p."userId" THEN TRUE ELSE FALSE END,
-		        'follow', CASE WHEN r."followerId" = $1 THEN TRUE ELSE FALSE END
-		  )) FILTER (WHERE c.id IS NOT NULL), '[]') AS comments
+		        'follow', CASE WHEN r."followerId" = $1 THEN TRUE ELSE FALSE END,
+            'createdAt', c."createdAt"
+		  )ORDER BY c."createdAt" ASC) FILTER (WHERE c.id IS NOT NULL), '[]') AS comments
     FROM posts p
     FULL JOIN comments c ON c."postId" = p.id
     LEFT JOIN users u ON u.id = c."userId"
