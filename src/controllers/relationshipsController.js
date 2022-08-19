@@ -45,6 +45,8 @@ export async function getPostsByFollow(_, res) {
     if (postsAt.length === 1 && postsAt[0].id === null)
       return res.status(200).send("No posts found from your friends");
 
+    if (postsAt[0].id === null) postsAt.shift();
+
     const { rows: comments } = await commentsRepository.getAll(userId);
 
     const { rows: likes } = await likesRepository.getAll();
@@ -62,7 +64,6 @@ export async function getPostsByFollow(_, res) {
           return (post = { ...post, likes: likes[i].likes });
       }
     });
-    console.log(teste);
 
     return res.status(200).send(teste);
   } catch (error) {
